@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Author = require('../models/Author');
 
-router.get('/author', async (req, res) => {
+router.get('/', async (req, res) => {
     try {
         const authors = await Author.find();
         res.json(authors);
@@ -12,11 +12,11 @@ router.get('/author', async (req, res) => {
     }
 });
 
-router.get('/author/:id', getAuthor, (req, res) => {
+router.get('/:id', getAuthor, (req, res) => {
     res.json(res.author);
 });
 
-router.post('/author', async (req, res) => {
+router.post('/', async (req, res) => {
     const author = new Author({
         name: req.body.name,
         residence: req.body.residence
@@ -31,7 +31,7 @@ router.post('/author', async (req, res) => {
     }
 });
 
-router.patch('/author/:id', getAuthor, async (req, res) => {
+router.patch('/:id', getAuthor, async (req, res) => {
     if (req.body.name != null) {
         res.author.name = req.body.name;
     }
@@ -48,7 +48,7 @@ router.patch('/author/:id', getAuthor, async (req, res) => {
     }
 });
 
-router.delete('/author/:id', getAuthor, async (req, res) => {
+router.delete('/:id', getAuthor, async (req, res) => {
     try {
         await res.author.remove();
         res.json({message: "Author deleted."});

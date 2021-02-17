@@ -33,7 +33,7 @@ const upload = multer({
     }
 });
 
-router.get('/book', async (req, res) => {
+router.get('/', async (req, res) => {
     try {
         const books = await Book.find().populate('author').exec();
         res.json(books); 
@@ -43,7 +43,7 @@ router.get('/book', async (req, res) => {
     }
 });
 
-router.post('/book', upload.single('coverImage'), async (req, res) => {
+router.post('/', upload.single('coverImage'), async (req, res) => {
     
     const book = new Book({
         title: req.body.title,
@@ -62,11 +62,11 @@ router.post('/book', upload.single('coverImage'), async (req, res) => {
 
 });
 
-router.get('/book/:id', getBook, (req, res) => {
+router.get('/:id', getBook, (req, res) => {
     res.json(res.book);
 });
 
-router.patch('/book/:id', getBook, async (req, res) => {
+router.patch('/:id', getBook, async (req, res) => {
     if (req.body.title != null) {
         res.book.title = req.body.title;
     }
@@ -89,7 +89,7 @@ router.patch('/book/:id', getBook, async (req, res) => {
     }
 });
 
-router.delete('/book/:id', getBook, async (req, res) => {
+router.delete('/:id', getBook, async (req, res) => {
     try {
         fs.unlink(res.book.coverImage, (err) => {
             if (err) {
