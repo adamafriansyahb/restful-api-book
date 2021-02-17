@@ -2,6 +2,45 @@ const express = require('express');
 const router = express.Router();
 const Book = require('../models/Book');
 
+const path = require('path');
+const coverImagePath = 'uploads/bookCovers';
+const uploadPath = path.join('public', coverImagePath);
+
+const multer = require('multer');
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, uploadPath);
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + file.originalname);
+    }
+});
+
+// const fileFilter = (req, file, cb) => {
+//     if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+//         cb(null, true);
+//     } 
+//     else {
+//         cb(null, false);
+//     }
+// }
+
+const upload = multer({
+    storage: storage,
+    limits: {
+        fileSize: 5 * 1024 * 1024
+    }, 
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+            cb(null, true);
+        } 
+        else {
+            cb(null, false);
+        }
+    }
+});
+
 router.get('/book', async (req, res) => {
     try {
         const books = await Book.find().populate('author').exec();
@@ -12,12 +51,14 @@ router.get('/book', async (req, res) => {
     }
 });
 
-router.post('/book', async (req, res) => {
+router.post('/book', upload.single('coverImage'), async (req, res) => {
+    
     const book = new Book({
         title: req.body.title,
         author: req.body.author,
         pageCount: req.body.pageCount,
-        summary: req.body.summary
+        summary: req.body.summary,
+        coverImage: req.file.path
     });
     try {
         const newBook = await book.save();

@@ -6,6 +6,7 @@ const authorsRoute = require('./routes/authors');
 const app = express();
 
 app.use(express.json());
+app.use(express.static('public'));
 
 const dbURI = "mongodb://127.0.0.1:27017/books";
 mongoose.connect(dbURI, {useNewUrlParser: true, useUnifiedTopology: true});
