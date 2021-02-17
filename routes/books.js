@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const fs = require('fs');
 const Book = require('../models/Book');
 
 const path = require('path');
@@ -16,15 +17,6 @@ const storage = multer.diskStorage({
         cb(null, Date.now() + file.originalname);
     }
 });
-
-// const fileFilter = (req, file, cb) => {
-//     if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
-//         cb(null, true);
-//     } 
-//     else {
-//         cb(null, false);
-//     }
-// }
 
 const upload = multer({
     storage: storage,
@@ -99,6 +91,11 @@ router.patch('/book/:id', getBook, async (req, res) => {
 
 router.delete('/book/:id', getBook, async (req, res) => {
     try {
+        fs.unlink(res.book.coverImage, (err) => {
+            if (err) {
+                console.log(err.message);
+            }
+        });
         await res.book.remove();
         res.json({message: 'Book deleted.'});
     }
