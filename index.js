@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const booksRoute = require('./routes/books');
+const authorsRoute = require('./routes/authors');
 
 const app = express();
 
@@ -17,6 +18,7 @@ db.once('open', () => {
 });
 
 app.use('/api', booksRoute);
+app.use('/api', authorsRoute);
 
 app.listen(3000, () => {
     console.log('Server running on port 3000...');
