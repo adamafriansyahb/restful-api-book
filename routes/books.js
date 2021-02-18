@@ -35,7 +35,7 @@ const upload = multer({
 
 router.get('/', async (req, res) => {
     try {
-        const books = await Book.find().populate('author').exec();
+        const books = await Book.find().populate('author').populate('publisher').exec();
         res.json(books); 
     }
     catch (err) {
@@ -50,7 +50,8 @@ router.post('/', upload.single('coverImage'), async (req, res) => {
         author: req.body.author,
         pageCount: req.body.pageCount,
         summary: req.body.summary,
-        coverImage: req.file.path
+        coverImage: req.file.path,
+        publisher: req.body.publisher
     });
     try {
         const newBook = await book.save();
@@ -91,11 +92,13 @@ router.patch('/:id', getBook, async (req, res) => {
 
 router.delete('/:id', getBook, async (req, res) => {
     try {
-        fs.unlink(res.book.coverImage, (err) => {
-            if (err) {
-                console.log(err.message);
-            }
-        });
+        if (res.book.coverImage) {
+            fs.unlink(res.book.coverImage, (err) => {
+                if (err) {
+                    console.log(err.message);
+                }
+            });
+        }
         await res.book.remove();
         res.json({message: 'Book deleted.'});
     }
@@ -107,7 +110,7 @@ router.delete('/:id', getBook, async (req, res) => {
 async function getBook(req, res, next) {
     let book;
     try {
-        book = await Book.findById(req.params.id);
+        book = await Book.findById(req.params.id).populate('author').populate('publisher').exec();
         if (book == null) {
             return res.status(404).json({message: 'Cannot find the book.'});
         }

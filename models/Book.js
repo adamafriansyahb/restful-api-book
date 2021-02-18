@@ -7,8 +7,8 @@ const bookSchema = mongoose.Schema({
     },
     author: {
         type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: 'Author'
+        ref: 'Author',
+        required: true
     },
     pageCount: {
         type: Number,
@@ -19,7 +19,12 @@ const bookSchema = mongoose.Schema({
         required: true
     },
     coverImage: {
-        type: String
+        type: String,
+        required: true
+    },
+    publisher: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Publisher'
     }
 }); 
 
