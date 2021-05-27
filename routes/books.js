@@ -3,6 +3,8 @@ const router = express.Router();
 const fs = require('fs');
 const Book = require('../models/Book');
 
+const verifyToken = require('../middleware/verifyToken');
+
 const path = require('path');
 const coverImagePath = 'uploads/bookCovers';
 const uploadPath = path.join('public', coverImagePath);
@@ -43,8 +45,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-router.post('/', upload.single('coverImage'), async (req, res) => {
-    
+router.post('/', [upload.single('coverImage'), verifyToken], async (req, res) => {
     const book = new Book({
         title: req.body.title,
         author: req.body.author,
@@ -67,7 +68,7 @@ router.get('/:id', getBook, (req, res) => {
     res.json(res.book);
 });
 
-router.patch('/:id', getBook, async (req, res) => {
+router.patch('/:id', [getBook, verifyToken], async (req, res) => {
     if (req.body.title != null) {
         res.book.title = req.body.title;
     }
@@ -90,7 +91,7 @@ router.patch('/:id', getBook, async (req, res) => {
     }
 });
 
-router.delete('/:id', getBook, async (req, res) => {
+router.delete('/:id', [getBook, verifyToken], async (req, res) => {
     try {
         if (res.book.coverImage) {
             fs.unlink(res.book.coverImage, (err) => {

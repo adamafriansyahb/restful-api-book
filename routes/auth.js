@@ -7,7 +7,7 @@ const User = require('../models/User');
 
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const secret = "secre3th3hE";
+const verifyToken = require('../middleware/verifyToken');
 
 router.post('/register', async (req, res) => {
     try {
@@ -26,7 +26,7 @@ router.post('/register', async (req, res) => {
 
         await newUser.save();
 
-        const token = jwt.sign({id: newUser._id}, secret, {
+        const token = jwt.sign({id: newUser._id}, process.env.SECRET, {
             expiresIn: 86400
         });
 
@@ -37,28 +37,34 @@ router.post('/register', async (req, res) => {
     }
 });
 
-router.get('/me', (req, res) => {
-    const token = req.headers['x-access-token'];
-
-    if (!token) {
-        return res.status(401).send({auth: false, message: "No token provided."});
+router.get('/me', verifyToken, async (req, res, next) => {
+    try {
+        const user = await User.findById(req.userId, {password: 0});
+        if (!user) return res.status(404).send("User not found.");
+        res.status(200).send(user);
     }
+    catch(err) {
+        res.status(500).send(err.message);
+    }
+});
 
-    jwt.verify(token, secret, async (err, decoded) => {
-        if (err) {
-            return res.status(500).send({auth: false, message: "Failed to authenticate."});
-        }
+router.post('/login', async (req, res) => {
+    try {
+        const user = await User.findOne({email: req.body.email});
+        if (!user) return res.status(404).send("User not found.");
 
-        try {
-            const user = await User.findById(decoded.id, {password: 0});
-            if (!user) return res.status(404).send("User not found.");
+        const passwordIsValid = await bcrypt.compare(req.body.password, user.password);
+        if (!passwordIsValid) return res.status(401).send({auth: false, token: null});
 
-            res.status(200).send(user);
-        }
-        catch(err) {
-            res.status(500).send(err.message);
-        }
-    });
+        const token = jwt.sign({id: user._id}, process.env.SECRET, {
+            expiresIn: 86400
+        });
+
+        res.status(200).send({auth: true, token: token});
+    }
+    catch(err) {
+        res.send(500).status(err.message);
+    }
 });
 
 module.exports = router;

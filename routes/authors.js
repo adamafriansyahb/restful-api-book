@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Author = require('../models/Author');
+const verifyToken = require('../middleware/verifyToken');
 
 router.get('/', async (req, res) => {
     try {
@@ -16,7 +17,7 @@ router.get('/:id', getAuthor, (req, res) => {
     res.json(res.author);
 });
 
-router.post('/', async (req, res) => {
+router.post('/', verifyToken, async (req, res) => {
     const author = new Author({
         name: req.body.name,
         residence: req.body.residence
@@ -31,7 +32,7 @@ router.post('/', async (req, res) => {
     }
 });
 
-router.patch('/:id', getAuthor, async (req, res) => {
+router.patch('/:id', [getAuthor, verifyToken], async (req, res) => {
     if (req.body.name != null) {
         res.author.name = req.body.name;
     }
@@ -48,7 +49,7 @@ router.patch('/:id', getAuthor, async (req, res) => {
     }
 });
 
-router.delete('/:id', getAuthor, async (req, res) => {
+router.delete('/:id', [getAuthor, verifyToken], async (req, res) => {
     try {
         await res.author.remove();
         res.json({message: "Author deleted."});

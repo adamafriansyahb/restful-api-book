@@ -1,3 +1,7 @@
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
+
 const express = require('express');
 const mongoose = require('mongoose');
 
@@ -11,8 +15,7 @@ const app = express();
 app.use(express.json());
 app.use(express.static('public'));
 
-const dbURI = "mongodb://127.0.0.1:27017/books";
-mongoose.connect(dbURI, {useNewUrlParser: true, useUnifiedTopology: true});
+mongoose.connect(process.env.DATABASE_URL, {useNewUrlParser: true, useUnifiedTopology: true});
 const db = mongoose.connection;
 db.on('error', (error) => {
   console.log(error);
@@ -26,6 +29,6 @@ app.use('/api/book', booksRoute);
 app.use('/api/author', authorsRoute);
 app.use('/api/publisher', publishersRoute)
 
-app.listen(3000, () => {
-    console.log('Server running on port 3000...');
+app.listen(process.env.PORT || 3000, () => {
+    console.log('Server is running...');
 });
